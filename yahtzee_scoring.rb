@@ -1,9 +1,17 @@
 class YahtzeeScoring
-  def self.best_score(roll)
-    score_upper = score_upper_section(roll)
-    score_lower = score_lower_section(roll)
+  attr_reader :roll, :tally, :best_score, :best_category
 
-    score_upper > score_lower ? score_upper : score_lower
+  def initialize(roll)
+    @tally = roll.tally
+    @roll_total = roll.sum
+
+    @best_score = 0
+    @best_category = nil
+  end
+  
+  def self.best_score(roll)
+    new(roll)
+    score_lower_section(roll)
   end
 
   def self.score_upper_section(roll)
@@ -35,7 +43,8 @@ class YahtzeeScoring
       score_small_straight(roll),
       score_large_straight(roll),
       score_yahtzee(roll),
-      score_chance(roll)
+      score_chance(roll),
+      score_upper_section(roll)
     ]
 
     categories.each do |result|
