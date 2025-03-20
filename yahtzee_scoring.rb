@@ -26,10 +26,7 @@ class YahtzeeScoring
 
     (1..6).each do |num|
       score = roll.count(num) * num
-      if score > best_score
-        best_score = score
-        best_category = num_to_category(num)
-      end
+      update_score(num_to_category(num), score)  
     end
     { category: best_category, score: best_score }
   end
@@ -43,20 +40,18 @@ class YahtzeeScoring
     return score_large_straight if large_straight?
     return score_small_straight if small_straight?
 
-    categories = [
-      score_three_of_a_kind(roll),
-      score_four_of_a_kind(roll),
-      score_full_house(roll),
-      score_chance(roll),
-      score_upper_section(roll)
-    ].max_by { |hash| hash[:score] }
+    score_full_house(roll)
+    score_four_of_a_kind(roll)
+    score_three_of_a_kind(roll)
+    score_upper_section(roll)
+    score_chance
+    high_score
   end
 
   def score_three_of_a_kind(roll)
     roll.each do |num|
-      return { category: :three_of_a_kind, score: roll.sum } if roll.count(num) >= 3
+      update_score(:three_of_a_kind, @roll_total) if roll.count(num) >= 3
     end
-    { category: nil, score: 0 }
   end
 
   def yahtzee?
@@ -88,21 +83,24 @@ class YahtzeeScoring
     high_score
   end
 
+  def full_house?
+    @sorted_tallies == [2, 3]
+  end
+
   def score_four_of_a_kind(roll)
     roll.each do |num|
-      return { category: :four_of_a_kind, score: roll.sum } if roll.count(num) >= 4
+      update_score(:four_of_a_kind, @roll_total) if roll.count(num) >= 4
     end
-    { category: nil, score: 0 }
   end
 
   def score_full_house(roll)
     counts = roll.tally.values.sort
-    return { category: :full_house, score: 25 } if counts == [2, 3]
+    update_score(:full_house, 25) if full_house?
     { category: nil, score: 0 }
   end
 
-  def score_chance(roll)
-    { category: :chance, score: roll.sum }
+  def score_chance
+    update_score(:chance, @roll_total)
   end
 
   def update_score(category, score)
