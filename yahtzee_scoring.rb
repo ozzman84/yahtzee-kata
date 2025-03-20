@@ -1,6 +1,7 @@
 class YahtzeeScoring
   attr_reader :roll, :tally, :best_score, :best_category
 
+  NUM_TO_CATEGORY = [:zero, :one, :two, :three, :four, :five, :six]
   STRAIGHTS = {
     small: [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]],
     large: [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]
@@ -19,41 +20,26 @@ class YahtzeeScoring
   end
   
   def self.best_score(roll)
-    new(roll).score_lower_section(roll)
+    new(roll).score_lower_section
   end
 
-  def score_upper_section(roll)
-    best_category = nil
-    best_score = 0
-
-    (1..6).each do |num|
-      score = roll.count(num) * num
-      update_score(num_to_category(num), score)  
-    end
-    { category: best_category, score: best_score }
-  end
-
-  def num_to_category(num)
-    { 1 => :ones, 2 => :twos, 3 => :threes, 4 => :fours, 5 => :fives, 6 => :sixes }[num]
-  end
-
-  def score_lower_section(roll)
+  def score_lower_section
     return score_yahtzee if yahtzee?
     return score_large_straight if large_straight?
     return score_small_straight if small_straight?
 
     update_score(:full_house, 25) if full_house?
     update_score(:four_of_a_kind, @roll_total) if four_of_a_kind?
-    score_three_of_a_kind(roll)
-    score_upper_section(roll)
+    update_score(:three_of_a_kind, @roll_total) if three_of_a_kind?
     score_chance
+    score_upper_section
     high_score
   end
 
-  def score_three_of_a_kind(roll)
-    roll.each do |num|
-      update_score(:three_of_a_kind, @roll_total) if roll.count(num) >= 3
-    end
+  private
+
+  def score_upper_section
+    @tally.each { |num, count| update_score(NUM_TO_CATEGORY[num - 1], num * count) }
   end
 
   def yahtzee?
@@ -91,6 +77,10 @@ class YahtzeeScoring
 
   def four_of_a_kind?
     @max_tally >= 4
+  end
+
+  def three_of_a_kind?
+    @max_tally >= 3
   end
 
   def score_chance
