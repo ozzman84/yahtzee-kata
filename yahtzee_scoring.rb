@@ -2,6 +2,7 @@ class YahtzeeScoring
   attr_reader :roll, :tally, :best_score, :best_category
 
   def initialize(roll)
+    @roll = roll
     @tally = roll.tally
     @roll_total = roll.sum
 
@@ -33,9 +34,6 @@ class YahtzeeScoring
   end
 
   def self.score_lower_section(roll)
-    best_category = nil
-    best_score = 0
-
     categories = [
       score_three_of_a_kind(roll),
       score_four_of_a_kind(roll),
@@ -45,16 +43,7 @@ class YahtzeeScoring
       score_yahtzee(roll),
       score_chance(roll),
       score_upper_section(roll)
-    ]
-
-    categories.each do |result|
-      if result[:score] > best_score
-        best_score = result[:score]
-        best_category = result[:category]
-      end
-    end
-
-    { category: best_category, score: best_score }
+    ].max_by { |hash| hash[:score] }
   end
 
   def self.score_three_of_a_kind(roll)
@@ -97,5 +86,12 @@ class YahtzeeScoring
 
   def self.score_chance(roll)
     { category: :chance, score: roll.sum }
+  end
+
+  def update_score(category, score)
+    return if score <= @best_score
+
+    @best_score = score
+    @best_category = category
   end
 end
