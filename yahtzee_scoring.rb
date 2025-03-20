@@ -11,11 +11,10 @@ class YahtzeeScoring
   end
   
   def self.best_score(roll)
-    new(roll)
-    score_lower_section(roll)
+    new(roll).score_lower_section(roll)
   end
 
-  def self.score_upper_section(roll)
+  def score_upper_section(roll)
     best_category = nil
     best_score = 0
 
@@ -29,62 +28,67 @@ class YahtzeeScoring
     { category: best_category, score: best_score }
   end
 
-  def self.num_to_category(num)
+  def num_to_category(num)
     { 1 => :ones, 2 => :twos, 3 => :threes, 4 => :fours, 5 => :fives, 6 => :sixes }[num]
   end
 
-  def self.score_lower_section(roll)
+  def score_lower_section(roll)
+    return score_yahtzee if yahtzee?
+
     categories = [
       score_three_of_a_kind(roll),
       score_four_of_a_kind(roll),
       score_full_house(roll),
       score_small_straight(roll),
       score_large_straight(roll),
-      score_yahtzee(roll),
       score_chance(roll),
       score_upper_section(roll)
     ].max_by { |hash| hash[:score] }
   end
 
-  def self.score_three_of_a_kind(roll)
+  def score_three_of_a_kind(roll)
     roll.each do |num|
       return { category: :three_of_a_kind, score: roll.sum } if roll.count(num) >= 3
     end
     { category: nil, score: 0 }
   end
 
-  def self.score_four_of_a_kind(roll)
+  def yahtzee?
+    @tally.size == 1
+  end
+
+  def score_yahtzee
+    update_score(:yahtzee, 50)
+    high_score
+  end
+
+  def score_four_of_a_kind(roll)
     roll.each do |num|
       return { category: :four_of_a_kind, score: roll.sum } if roll.count(num) >= 4
     end
     { category: nil, score: 0 }
   end
 
-  def self.score_full_house(roll)
+  def score_full_house(roll)
     counts = roll.tally.values.sort
     return { category: :full_house, score: 25 } if counts == [2, 3]
     { category: nil, score: 0 }
   end
 
-  def self.score_small_straight(roll)
+  def score_small_straight(roll)
     unique_sorted = roll.uniq.sort
     straights = [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]
     return { category: :small_straight, score: 30 } if straights.any? { |s| (s - unique_sorted).empty? }
     { category: nil, score: 0 }
   end
 
-  def self.score_large_straight(roll)
+  def score_large_straight(roll)
     unique_sorted = roll.uniq.sort
     return { category: :large_straight, score: 40 } if unique_sorted == [1, 2, 3, 4, 5] || unique_sorted == [2, 3, 4, 5, 6]
     { category: nil, score: 0 }
   end
 
-  def self.score_yahtzee(roll)
-    return { category: :yahtzee, score: 50 } if roll.uniq.length == 1
-    { category: nil, score: 0 }
-  end
-
-  def self.score_chance(roll)
+  def score_chance(roll)
     { category: :chance, score: roll.sum }
   end
 
@@ -93,5 +97,9 @@ class YahtzeeScoring
 
     @best_score = score
     @best_category = category
+  end
+
+  def high_score
+    { category: @best_category, score: @best_score }
   end
 end
