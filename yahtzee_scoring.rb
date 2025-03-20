@@ -1,10 +1,16 @@
 class YahtzeeScoring
   attr_reader :roll, :tally, :best_score, :best_category
 
+  STRAIGHTS = {
+    small: [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]],
+    large: [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]
+  }
+
   def initialize(roll)
     @roll = roll
     @tally = roll.tally
     @roll_total = roll.sum
+    @unique_sorted = @tally.keys.sort
 
     @best_score = 0
     @best_category = nil
@@ -34,13 +40,13 @@ class YahtzeeScoring
 
   def score_lower_section(roll)
     return score_yahtzee if yahtzee?
+    return score_large_straight if large_straight?
 
     categories = [
       score_three_of_a_kind(roll),
       score_four_of_a_kind(roll),
       score_full_house(roll),
       score_small_straight(roll),
-      score_large_straight(roll),
       score_chance(roll),
       score_upper_section(roll)
     ].max_by { |hash| hash[:score] }
@@ -62,6 +68,16 @@ class YahtzeeScoring
     high_score
   end
 
+  def large_straight?
+    return unless @tally.size == 5
+    STRAIGHTS[:large].include?(@unique_sorted)
+  end
+
+  def score_large_straight
+    update_score(:large_straight, 40)
+    high_score
+  end 
+
   def score_four_of_a_kind(roll)
     roll.each do |num|
       return { category: :four_of_a_kind, score: roll.sum } if roll.count(num) >= 4
@@ -79,12 +95,6 @@ class YahtzeeScoring
     unique_sorted = roll.uniq.sort
     straights = [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]
     return { category: :small_straight, score: 30 } if straights.any? { |s| (s - unique_sorted).empty? }
-    { category: nil, score: 0 }
-  end
-
-  def score_large_straight(roll)
-    unique_sorted = roll.uniq.sort
-    return { category: :large_straight, score: 40 } if unique_sorted == [1, 2, 3, 4, 5] || unique_sorted == [2, 3, 4, 5, 6]
     { category: nil, score: 0 }
   end
 
