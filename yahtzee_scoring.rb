@@ -11,6 +11,8 @@ class YahtzeeScoring
     @tally = roll.tally
     @roll_total = roll.sum
     @unique_sorted = @tally.keys.sort
+    @sorted_tallies = @tally.values.sort
+    @max_tally = @sorted_tallies.last
 
     @best_score = 0
     @best_category = nil
@@ -41,7 +43,7 @@ class YahtzeeScoring
     return score_small_straight if small_straight?
 
     update_score(:full_house, 25) if full_house?
-    score_four_of_a_kind(roll)
+    update_score(:four_of_a_kind, @roll_total) if four_of_a_kind?
     score_three_of_a_kind(roll)
     score_upper_section(roll)
     score_chance
@@ -87,10 +89,8 @@ class YahtzeeScoring
     @sorted_tallies == [2, 3]
   end
 
-  def score_four_of_a_kind(roll)
-    roll.each do |num|
-      update_score(:four_of_a_kind, @roll_total) if roll.count(num) >= 4
-    end
+  def four_of_a_kind?
+    @max_tally >= 4
   end
 
   def score_chance
