@@ -40,7 +40,7 @@ class YahtzeeScoring
     return score_large_straight if large_straight?
     return score_small_straight if small_straight?
 
-    score_full_house(roll)
+    update_score(:full_house, 25) if full_house?
     score_four_of_a_kind(roll)
     score_three_of_a_kind(roll)
     score_upper_section(roll)
@@ -91,12 +91,6 @@ class YahtzeeScoring
     roll.each do |num|
       update_score(:four_of_a_kind, @roll_total) if roll.count(num) >= 4
     end
-  end
-
-  def score_full_house(roll)
-    counts = roll.tally.values.sort
-    update_score(:full_house, 25) if full_house?
-    { category: nil, score: 0 }
   end
 
   def score_chance
