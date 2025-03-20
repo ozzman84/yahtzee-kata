@@ -1,21 +1,9 @@
 class YahtzeeScoring
   def self.best_score(roll)
-    best_category = nil
-    best_score = 0
+    score_upper = score_upper_section(roll)
+    score_lower = score_lower_section(roll)
 
-    score = score_upper_section(roll)
-    if score[:score] > best_score
-      best_score = score[:score]
-      best_category = score[:category]
-    end
-
-    score = score_lower_section(roll)
-    if score[:score] > best_score
-      best_score = score[:score]
-      best_category = score[:category]
-    end
-
-    { category: best_category, score: best_score }
+    score_upper > score_lower ? score_upper : score_lower
   end
 
   def self.score_upper_section(roll)
