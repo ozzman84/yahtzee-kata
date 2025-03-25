@@ -14,7 +14,7 @@ class YahtzeeScoring
     @best_score = 0
     @best_category = nil
   end
-  
+
   def self.best_score(roll)
     new(roll).score_lower_section
   end

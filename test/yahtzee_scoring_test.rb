@@ -22,7 +22,7 @@ class TestYahtzeeScoring < Minitest::Test
   def test_best_score_large_straight1
     assert_equal({ category: :large_straight, score: 40 }, YahtzeeScoring.best_score([2, 3, 4, 5, 6]))
   end
-
+  
   def test_best_score_large_straight2
     assert_equal({ category: :large_straight, score: 40 }, YahtzeeScoring.best_score([2, 3, 4, 5, 1]))
   end
