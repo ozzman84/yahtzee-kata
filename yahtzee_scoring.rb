@@ -1,19 +1,15 @@
 class YahtzeeScoring
-  attr_reader :roll, :tally, :best_score, :best_category
-
-  NUM_TO_CATEGORY = [:zero, :one, :two, :three, :four, :five, :six]
+  NUM_TO_CATEGORY = [:one, :two, :three, :four, :five, :six]
   STRAIGHTS = {
     small: [[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]],
     large: [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]
   }
 
   def initialize(roll)
-    @roll = roll
     @tally = roll.tally
     @roll_total = roll.sum
     @unique_sorted = @tally.keys.sort
     @sorted_tallies = @tally.values.sort
-    @max_tally = @sorted_tallies.last
 
     @best_score = 0
     @best_category = nil
